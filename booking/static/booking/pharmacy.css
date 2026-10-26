@@ -16,6 +16,12 @@ input:focus,select:focus,textarea:focus,.btn:focus-visible{outline:3px solid rgb
 .err{margin:.3rem 0 0;color:var(--red);font-size:.88rem}
 .btn{display:inline-block;padding:.95rem 1.4rem;background:var(--green);color:#fff;font:700 1rem "DM Sans",sans-serif;border:0;border-radius:8px;text-decoration:none;text-align:center;cursor:pointer}
 .btn:hover{background:var(--green2)}
+.btn:disabled{opacity:.8;cursor:wait}
+.spinner{display:none;width:1rem;height:1rem;margin-right:.55rem;vertical-align:-.15rem;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%}
+.btn[aria-busy="true"] .spinner{display:inline-block;animation:spin .75s linear infinite}
+.submit-status{margin:-.6rem 0 0;text-align:center;color:#315856;font-size:.92rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.btn[aria-busy="true"] .spinner{animation-duration:2s}}
 .done{text-align:center}
 .done h1{font:700 2rem "DM Sans",sans-serif;margin:.2rem 0}
 .code{display:inline-block;margin:.5rem 0 1.2rem;padding:.6rem 1.4rem;font:700 1.6rem monospace;letter-spacing:.12em;background:var(--green);color:#fff;border-radius:10px}

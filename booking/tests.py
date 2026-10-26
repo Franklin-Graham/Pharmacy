@@ -121,6 +121,9 @@ class PharmacyOrderFormTests(TestCase):
         self.assertContains(response, "Adhesive bandages")
         self.assertContains(response, "Paracetamol 500 mg tablets")
         self.assertContains(response, "Prescription medicines are not available")
+        self.assertContains(response, 'id="place-order-button"')
+        self.assertContains(response, 'id="submit-status"')
+        self.assertContains(response, "Submitting your order. Please wait.")
         self.assertNotContains(response, "Hot dum briyani")
 
     def test_active_catalogue_products_are_orderable_at_database_price(self):

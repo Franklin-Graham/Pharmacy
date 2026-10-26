@@ -6,7 +6,7 @@
   <p>Shop our sample non-prescription essentials for delivery or pickup.</p>
 </section>
 <section class="panel">
-  <form method="post" novalidate class="grid">
+  <form method="post" novalidate class="grid" id="order-form">
     {% csrf_token %}
     {% for e in form.non_field_errors %}<p class="err wide" role="alert">{{ e }}</p>{% endfor %}
 
@@ -46,12 +46,23 @@
       <dt>Delivery fee</dt><dd>₹<span id="fee">0</span></dd>
       <dt class="grand">Total (pay on arrival)</dt><dd class="grand">₹<span id="total">0</span></dd>
     </dl>
-    <button type="submit" class="btn wide">Place order</button>
+    <button type="submit" class="btn wide" id="place-order-button">
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="place-order-label">Place order</span>
+    </button>
+    <p class="submit-status wide" id="submit-status" role="status" aria-live="polite" hidden>
+      Submitting your order. Please wait.
+    </p>
   </form>
 </section>
 <script>
 (function(){
   var FEE={{ delivery_fee }}, qs=document.querySelectorAll('[data-price]'), box=document.getElementById('addr');
+  var form=document.getElementById('order-form');
+  var submitButton=document.getElementById('place-order-button');
+  var submitLabel=document.getElementById('place-order-label');
+  var submitStatus=document.getElementById('submit-status');
+  var submitting=false;
   function calc(){
     var s=0; qs.forEach(function(q){s+=(parseInt(q.value)||0)*parseInt(q.dataset.price,10);});
     var r=document.querySelector('input[name=fulfilment]:checked'), del=!r||r.value==='delivery', f=del?FEE:0;
@@ -59,6 +70,21 @@
     document.getElementById('sub').textContent=s; document.getElementById('fee').textContent=f;
     document.getElementById('total').textContent=s+f;
   }
+  form.addEventListener('submit',function(){
+    if(submitting){return;}
+    submitting=true;
+    submitButton.disabled=true;
+    submitButton.setAttribute('aria-busy','true');
+    submitLabel.textContent='Placing order...';
+    submitStatus.hidden=false;
+  });
+  window.addEventListener('pageshow',function(){
+    submitting=false;
+    submitButton.disabled=false;
+    submitButton.removeAttribute('aria-busy');
+    submitLabel.textContent='Place order';
+    submitStatus.hidden=true;
+  });
   document.addEventListener('input',calc); document.addEventListener('change',calc); calc();
 })();
 </script>
