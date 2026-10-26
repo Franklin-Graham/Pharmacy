@@ -1,0 +1,18 @@
+{% extends "booking/base.html" %}
+{% block title %}Order received{% endblock %}
+{% block content %}
+<section class="panel done">
+  <h1>Order placed, {{ order.name }}.</h1>
+  <p>Your order code</p>
+  <p class="code">{{ order.reference }}</p>
+  <dl>
+    {% for i in order.items.all %}<dt>{{ i.quantity }} x {{ i.name }}</dt><dd>₹{{ i.line_total }}</dd>{% endfor %}
+    {% if order.delivery_fee %}<dt>Delivery fee</dt><dd>₹{{ order.delivery_fee }}</dd>{% endif %}
+    <dt><b>Total</b></dt><dd><b>₹{{ order.total }}</b></dd>
+    <dt>{{ order.get_fulfilment_display }}</dt><dd>{{ order.date|date:"j M" }}, {{ order.time|time:"h:i A" }}</dd>
+    <dt>Status</dt><dd>{{ order.get_status_display }}</dd>
+  </dl>
+  <p>Pay cash or UPI when your order arrives. We will confirm availability shortly.</p>
+  <a class="btn" href="{% url 'my_orders' %}">Track my order</a>
+</section>
+{% endblock %}

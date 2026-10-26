@@ -1,0 +1,6 @@
+Django==5.2.18
+django-unfold==0.91.0
+dj-database-url>=2.3,<3
+gunicorn>=23,<24
+psycopg[binary]>=3.2,<4
+whitenoise>=6.9,<7

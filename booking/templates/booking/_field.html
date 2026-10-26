@@ -1,0 +1,5 @@
+<div class="field{% if wide %} wide{% endif %}{% if field.errors %} has-error{% endif %}">
+  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {{ field }}
+  {% for e in field.errors %}<p class="err" role="alert">{{ e }}</p>{% endfor %}
+</div>

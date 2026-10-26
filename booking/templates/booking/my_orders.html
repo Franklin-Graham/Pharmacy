@@ -1,0 +1,28 @@
+{% extends "booking/base.html" %}
+{% block title %}My orders{% endblock %}
+{% block content %}
+<section class="hero slim"><h1>My orders</h1><p>Pending means we are reviewing it. Ready means it is on its way or waiting for pickup.</p></section>
+<section class="panel list">
+  {% for o in orders %}
+  <article class="item">
+    <div>
+      <p class="ref">{{ o.reference }}</p>
+      <p>{% for i in o.items.all %}{{ i.quantity }} x {{ i.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+      <p class="sub">{{ o.get_fulfilment_display }}, {{ o.date|date:"D, j M" }} at {{ o.time|time:"h:i A" }}</p>
+      <p class="sub">Total ₹{{ o.total }}</p>
+    </div>
+    <div class="side">
+      <span class="badge {{ o.status }}">{{ o.get_status_display }}</span>
+      {% if o.status == "pending" %}
+      <form method="post" action="{% url 'cancel' o.reference %}" onsubmit="return confirm('Cancel this order?')">
+        {% csrf_token %}<button type="submit" class="linkbtn danger">Cancel</button>
+      </form>
+      {% endif %}
+    </div>
+  </article>
+  {% empty %}
+  <p class="empty">No orders yet. Browse the pharmacy catalogue to get started.</p>
+  {% endfor %}
+  <a class="btn" href="{% url 'order' %}">Shop products</a>
+</section>
+{% endblock %}

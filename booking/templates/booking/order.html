@@ -1,0 +1,65 @@
+{% extends "booking/base.html" %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">AYSHA PHARMACY</p>
+  <h1>Everyday health essentials,<br>delivered with care.</h1>
+  <p>Shop our sample non-prescription essentials for delivery or pickup.</p>
+</section>
+<section class="panel">
+  <form method="post" novalidate class="grid">
+    {% csrf_token %}
+    {% for e in form.non_field_errors %}<p class="err wide" role="alert">{{ e }}</p>{% endfor %}
+
+    <h2 class="wide">Health &amp; personal-care essentials</h2>
+    <p class="wide catalog-note">Sample products and prices — verify product authorization, pricing, and local sale requirements before opening your shop. Prescription medicines are not available.</p>
+    <div class="menu wide">
+      {% for field, product in form.product_rows %}
+      <div class="product">
+        <div class="product-info">
+          <label for="{{ field.id_for_label }}"><b>{{ product.name }}</b></label>
+          {% if product.description %}<p>{{ product.description }}</p>{% endif %}
+          <span>₹{{ product.price }} / {{ product.unit_label }}</span>
+        </div>
+        {{ field }}
+      </div>
+      {% endfor %}
+    </div>
+
+    <h2 class="wide">Delivery or pickup</h2>
+    <div class="pills wide">{% for r in form.fulfilment %}<label class="pill">{{ r.tag }} {{ r.choice_label }}</label>{% endfor %}</div>
+    <div class="field wide{% if form.address.errors %} has-error{% endif %}" id="addr">
+      <label for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+      {{ form.address }}
+      {% for e in form.address.errors %}<p class="err" role="alert">{{ e }}</p>{% endfor %}
+    </div>
+    {% include "booking/_field.html" with field=form.date %}
+    {% include "booking/_field.html" with field=form.time %}
+
+    <h2 class="wide">Your details</h2>
+    {% include "booking/_field.html" with field=form.name %}
+    {% include "booking/_field.html" with field=form.phone %}
+    {% include "booking/_field.html" with field=form.email wide=True %}
+    {% include "booking/_field.html" with field=form.notes wide=True %}
+
+    <dl class="totals wide">
+      <dt>Items subtotal</dt><dd>₹<span id="sub">0</span></dd>
+      <dt>Delivery fee</dt><dd>₹<span id="fee">0</span></dd>
+      <dt class="grand">Total (pay on arrival)</dt><dd class="grand">₹<span id="total">0</span></dd>
+    </dl>
+    <button type="submit" class="btn wide">Place order</button>
+  </form>
+</section>
+<script>
+(function(){
+  var FEE={{ delivery_fee }}, qs=document.querySelectorAll('[data-price]'), box=document.getElementById('addr');
+  function calc(){
+    var s=0; qs.forEach(function(q){s+=(parseInt(q.value)||0)*parseInt(q.dataset.price,10);});
+    var r=document.querySelector('input[name=fulfilment]:checked'), del=!r||r.value==='delivery', f=del?FEE:0;
+    box.hidden=!del;
+    document.getElementById('sub').textContent=s; document.getElementById('fee').textContent=f;
+    document.getElementById('total').textContent=s+f;
+  }
+  document.addEventListener('input',calc); document.addEventListener('change',calc); calc();
+})();
+</script>
+{% endblock %}
