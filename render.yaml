@@ -2,9 +2,9 @@ services:
   - type: web
     name: aysha-pharmacy
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input
-    preDeployCommand: python manage.py migrate
-    startCommand: gunicorn briyani_site.wsgi:application
+    startCommand: python manage.py migrate && gunicorn briyani_site.wsgi:application
     healthCheckPath: /health/
     envVars:
       - key: DEBUG
@@ -40,4 +40,4 @@ databases:
   - name: aysha-pharmacy-db
     databaseName: aysha_pharmacy
     user: aysha_pharmacy
-    plan: basic-256mb
+    plan: free
