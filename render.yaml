@@ -3,7 +3,7 @@ services:
     name: aysha-pharmacy
     runtime: python
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input
-    releaseCommand: python manage.py migrate
+    preDeployCommand: python manage.py migrate
     startCommand: gunicorn briyani_site.wsgi:application
     healthCheckPath: /health/
     envVars:
