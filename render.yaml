@@ -21,20 +21,6 @@ services:
         fromDatabase:
           name: aysha-pharmacy-db
           property: connectionString
-      - key: SALESFORCE_CLIENT_ID
-        sync: false
-      - key: SALESFORCE_CLIENT_SECRET
-        sync: false
-      - key: SALESFORCE_ACCOUNT_ID
-        sync: false
-      - key: SALESFORCE_LOGIN_URL
-        sync: false
-      - key: EMAIL_HOST_USER
-        sync: false
-      - key: EMAIL_HOST_PASSWORD
-        sync: false
-      - key: DEFAULT_FROM_EMAIL
-        sync: false
 
 databases:
   - name: aysha-pharmacy-db
