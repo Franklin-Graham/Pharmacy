@@ -1,8 +1,11 @@
 import json
+import os
 from datetime import time, timedelta
 from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -10,6 +13,57 @@ from django.utils import timezone
 from .forms import OrderForm
 from .models import Order, OrderItem, Product
 from .salesforce import SalesforceClient
+
+
+class BootstrapSuperuserTests(TestCase):
+    @patch.dict(os.environ, {}, clear=True)
+    def test_skips_when_bootstrap_credentials_are_unset(self):
+        call_command("bootstrap_superuser")
+
+        self.assertEqual(User.objects.count(), 0)
+
+    @patch.dict(os.environ, {
+        "BOOTSTRAP_SUPERUSER_USERNAME": "live-store-admin",
+        "BOOTSTRAP_SUPERUSER_EMAIL": "admin@example.com",
+        "BOOTSTRAP_SUPERUSER_PASSWORD": "A-strong-uncommon-admin-pass-739!",
+    }, clear=True)
+    def test_creates_superuser_and_is_idempotent(self):
+        call_command("bootstrap_superuser")
+        admin = User.objects.get(username="live-store-admin")
+        self.assertTrue(admin.is_staff)
+        self.assertTrue(admin.is_superuser)
+        self.assertTrue(admin.check_password(
+            "A-strong-uncommon-admin-pass-739!"
+        ))
+
+        os.environ["BOOTSTRAP_SUPERUSER_PASSWORD"] = "Another-password-739!Strong"
+        call_command("bootstrap_superuser")
+        admin.refresh_from_db()
+        self.assertTrue(admin.check_password(
+            "A-strong-uncommon-admin-pass-739!"
+        ))
+
+    @patch.dict(os.environ, {
+        "BOOTSTRAP_SUPERUSER_USERNAME": "live-store-admin",
+        "BOOTSTRAP_SUPERUSER_EMAIL": "",
+        "BOOTSTRAP_SUPERUSER_PASSWORD": "",
+    }, clear=True)
+    def test_rejects_partial_credentials(self):
+        with self.assertRaises(CommandError):
+            call_command("bootstrap_superuser")
+
+    @patch.dict(os.environ, {
+        "BOOTSTRAP_SUPERUSER_USERNAME": "existing-user",
+        "BOOTSTRAP_SUPERUSER_EMAIL": "admin@example.com",
+        "BOOTSTRAP_SUPERUSER_PASSWORD": "A-strong-uncommon-admin-pass-739!",
+    }, clear=True)
+    def test_does_not_promote_existing_regular_user(self):
+        User.objects.create_user(username="existing-user", password="old-password")
+
+        with self.assertRaises(CommandError):
+            call_command("bootstrap_superuser")
+
+        self.assertFalse(User.objects.get(username="existing-user").is_superuser)
 
 
 class SalesforceSyncTests(TestCase):
