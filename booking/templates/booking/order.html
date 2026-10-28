@@ -5,27 +5,51 @@
   <h1>Everyday health essentials,<br>delivered with care.</h1>
   <p>Shop our sample non-prescription essentials for delivery or pickup.</p>
 </section>
-<section class="panel">
+<section class="panel shop-panel">
   <form method="post" novalidate class="grid" id="order-form">
     {% csrf_token %}
     {% for e in form.non_field_errors %}<p class="err wide" role="alert">{{ e }}</p>{% endfor %}
 
-    <h2 class="wide">Health &amp; personal-care essentials</h2>
-    <p class="wide catalog-note">Sample products and prices — verify product authorization, pricing, and local sale requirements before opening your shop. Prescription medicines are not available.</p>
-    <div class="menu wide">
-      {% for field, product in form.product_rows %}
-      <div class="product">
-        <div class="product-info">
-          <label for="{{ field.id_for_label }}"><b>{{ product.name }}</b></label>
-          {% if product.description %}<p>{{ product.description }}</p>{% endif %}
-          <span>₹{{ product.price }} / {{ product.unit_label }}</span>
-        </div>
-        {{ field }}
+    <div class="catalog-heading wide">
+      <div>
+        <p class="catalog-kicker">SHOP THE CATALOG</p>
+        <h2>Health &amp; personal-care essentials</h2>
+        <p class="catalog-count"><span id="product-count">{{ form.products|length }}</span> products</p>
       </div>
+      <label class="catalog-search">
+        <span class="sr-only">Search products</span>
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <input type="search" id="product-search" placeholder="Search medicines and essentials" autocomplete="off">
+      </label>
+    </div>
+    <p class="wide catalog-note">Sample products and prices — verify product authorization, pricing, and local sale requirements before opening your shop. Prescription medicines are not available.</p>
+    <div class="product-grid wide" id="product-grid">
+      {% for field, product in form.product_rows %}
+      <article class="product-card" data-product-card data-search="{{ product.name|lower }} {{ product.description|lower }}">
+        <div class="product-art" aria-hidden="true">
+          <span class="art-glow"></span>
+          <span class="art-pack"><span class="art-cross">+</span><span class="art-lines"></span></span>
+          <span class="art-capsule"></span>
+        </div>
+        <div class="product-card-body">
+          <p class="product-tag">EVERYDAY CARE</p>
+          <h3>{{ product.name }}</h3>
+          {% if product.description %}<p class="product-description">{{ product.description }}</p>{% endif %}
+          <p class="product-unit">{{ product.unit_label }}</p>
+          <div class="product-buy-row">
+            <p class="product-price"><span>₹</span>{{ product.price }}</p>
+            <label class="quantity-control">
+              <span class="sr-only">Quantity of {{ product.name }}</span>
+              {{ field }}
+            </label>
+          </div>
+        </div>
+      </article>
       {% endfor %}
     </div>
+    <p class="empty-products wide" id="empty-products" hidden>No products match your search. Try another name.</p>
 
-    <h2 class="wide">Delivery or pickup</h2>
+    <h2 class="wide checkout-heading">Delivery or pickup</h2>
     <div class="pills wide">{% for r in form.fulfilment %}<label class="pill">{{ r.tag }} {{ r.choice_label }}</label>{% endfor %}</div>
     <div class="field wide{% if form.address.errors %} has-error{% endif %}" id="addr">
       <label for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
@@ -62,7 +86,21 @@
   var submitButton=document.getElementById('place-order-button');
   var submitLabel=document.getElementById('place-order-label');
   var submitStatus=document.getElementById('submit-status');
+  var search=document.getElementById('product-search');
+  var cards=Array.prototype.slice.call(document.querySelectorAll('[data-product-card]'));
+  var productCount=document.getElementById('product-count');
+  var emptyProducts=document.getElementById('empty-products');
   var submitting=false;
+  function filterProducts(){
+    var term=search.value.trim().toLowerCase(), visible=0;
+    cards.forEach(function(card){
+      var matches=card.dataset.search.indexOf(term)!==-1;
+      card.hidden=!matches;
+      if(matches){visible++;}
+    });
+    productCount.textContent=visible;
+    emptyProducts.hidden=visible!==0;
+  }
   function calc(){
     var s=0; qs.forEach(function(q){s+=(parseInt(q.value)||0)*parseInt(q.dataset.price,10);});
     var r=document.querySelector('input[name=fulfilment]:checked'), del=!r||r.value==='delivery', f=del?FEE:0;
@@ -85,6 +123,7 @@
     submitLabel.textContent='Place order';
     submitStatus.hidden=true;
   });
+  search.addEventListener('input',filterProducts);
   document.addEventListener('input',calc); document.addEventListener('change',calc); calc();
 })();
 </script>
